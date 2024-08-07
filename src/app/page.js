@@ -1,95 +1,137 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+// src/app/page.js
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
+'use client';
+import React, { useState, useEffect, useRef } from 'react'; // Ensure useEffect is imported
+import { Container, CssBaseline, ThemeProvider, createTheme, Box } from '@mui/material';
+import Header from './components/Header';
+import InputForm from './components/InputForm';
+import Graph from './components/Graph';
+import 'chartjs-plugin-annotation';
+
+export default function Page() {
+    const [data, setData] = useState([{ time: 0, temperature: 0 }]);
+    const [cumulativeTime, setCumulativeTime] = useState(0);
+    const [prevTemperature, setPrevTemperature] = useState(0);
+    const [graphTitle, setGraphTitle] = useState('Graph Title');
+    const [theme, setTheme] = useState('light');
+    const timeInputRef = useRef(null); // Create a ref
+
+    // Define light and dark themes
+    const darkTheme = createTheme({
+        palette: {
+            mode: 'dark',
+        },
+    });
+
+    const lightTheme = createTheme({
+        palette: {
+            mode: 'light',
+        },
+    });
+
+    // Toggle theme between light and dark
+    const handleThemeChange = () => {
+        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    };
+
+    // Update previous temperature based on data
+    useEffect(() => {
+        if (data.length > 1) { // Ensure at least two points to have a valid previous temperature
+            const maxTimeDataPoint = data.reduce((prev, current) => (prev.time > current.time ? prev : current));
+            setPrevTemperature(maxTimeDataPoint.temperature);
+        } else {
+            setPrevTemperature(0);
+        }
+    }, [data]);
+
+    // Add new data point
+    const addData = (newData) => {
+        const updatedData = {
+            ...newData,
+            time: cumulativeTime + newData.time
+        };
+        setData(prevData => [...prevData, updatedData]);
+        setCumulativeTime(updatedData.time);
+    };
+
+    // Remove a data point
+    const removeData = (index) => {
+        setData(prevData => {
+            const newData = prevData.filter((_, i) => i !== index);
+            const newCumulativeTime = newData.reduce((acc, cur) => acc + cur.time, 0);
+            setCumulativeTime(newCumulativeTime);
+            return newData;
+        });
+    };
+
+    return (
+        <ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
+            <CssBaseline />
+            <Header theme={theme} toggleTheme={handleThemeChange} />
+            <Box
+                sx={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    backgroundColor: theme === 'light' ? '#ffffff' : '#000000',
+                    zIndex: -1, // Ensure it is behind other content
+                    overflow: 'hidden',
+                }}
             />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+            <Container
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100vh',
+                    padding: 2,
+                    backgroundColor: 'transparent', // Set to transparent to show the background box
+                    overflow: 'hidden', // Prevent overflow
+                }}
+            >
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        overflow: 'hidden', // Prevent scrolling
+                    }}
+                >
+                    <Box
+                        sx={{
+                            border: '2px solid',
+                            borderColor: theme === 'light' ? 'grey.300' : 'grey.700',
+                            borderRadius: 2,
+                            padding: 2,
+                            backgroundColor: 'background.paper',
+                            flexShrink: 0,
+                        }}
+                    >
+                        <InputForm addData={addData} prevTemperature={prevTemperature} ref={timeInputRef} />
+                    </Box>
+                    <Box
+                        sx={{
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '2px solid',
+                            borderColor: theme === 'light' ? 'grey.300' : 'grey.700',
+                            borderRadius: 2,
+                            padding: 2,
+                            marginTop: 1, // Add some margin to adjust vertical position
+                            backgroundColor: 'background.paper',
+                        }}
+                    >
+                        <div style={{ width: '100%', height: '100%' }}>
+                            <Graph data={data} removeData={removeData} title={graphTitle} theme={theme} />
+                        </div>
+                    </Box>
+                </Box>
+            </Container>
+        </ThemeProvider>
+    );
 }
