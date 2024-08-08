@@ -53,7 +53,7 @@ const Graph = ({ data, removeData, title, theme }) => {
 
             return [
                 {
-                    x: (point.time + (nextPoint.time - point.time) / 2), // Use input time directly
+                    x: (point.time + (nextPoint.time - point.time) / 2),
                     y: (point.temperature + nextPoint.temperature) / 2,
                     label: `Duration: ${timeDiff.toFixed(2)} hours\nRate: ${rate} °C/hour`,
                 }
@@ -253,7 +253,7 @@ const Graph = ({ data, removeData, title, theme }) => {
     };
 
     return (
-        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', height: '65vh', position: 'relative' }}>
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', height: '100%', width: '100%', position: 'relative' }}>
             <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', position: 'relative', zIndex: 10 }}>
                 <input
                     type="text"
@@ -262,9 +262,11 @@ const Graph = ({ data, removeData, title, theme }) => {
                     style={{
                         fontSize: '1.5rem',
                         padding: '0.5rem',
-                        border: '1px solid #ccc',
+                        border: `1px solid ${theme === 'dark' ? '#444' : '#ccc'}`,
                         borderRadius: '4px',
                         textAlign: 'center',
+                        backgroundColor: theme === 'dark' ? '#333' : '#fff',
+                        color: theme === 'dark' ? '#fff' : '#000',
                         zIndex: 10,
                         position: 'relative',
                     }}
@@ -272,17 +274,19 @@ const Graph = ({ data, removeData, title, theme }) => {
                 <button onClick={handlePrint} style={{
                     fontSize: '1.5rem',
                     padding: '0.5rem',
-                    border: '1px solid #ccc',
+                    border: `1px solid ${theme === 'dark' ? '#444' : '#ccc'}`,
                     borderRadius: '4px',
                     cursor: 'pointer',
+                    backgroundColor: theme === 'dark' ? '#555' : '#f0f0f0',
+                    color: theme === 'dark' ? '#fff' : '#000',
                     zIndex: 20,
                     position: 'relative',
                 }}>
                     Print
                 </button>
             </div>
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: '0.5rem', position: 'relative', zIndex: 1 }}>
-                <div style={{ width: '100%', height: '100%' }}>
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                <div style={{ width: '100%', height: '80%' }}>
                     <Line
                         ref={chartRef}
                         data={chartData}
@@ -290,25 +294,27 @@ const Graph = ({ data, removeData, title, theme }) => {
                     />
                     <div style={{
                         position: 'absolute',
-                        bottom: -40,
+                        bottom: 0,
                         left: 0,
-                        padding: '1rem',
+                        padding: '0.3rem',
                         color: axisColor,
                         backgroundColor: theme === 'dark' ? '#000' : '#fff',
                         zIndex: 5,
                         fontSize: '0.9rem',
+                        textAlign: 'left',
                     }}>
                         <p>Start Time: {startTime}</p>
                     </div>
                     <div style={{
                         position: 'absolute',
-                        bottom: -40,
+                        bottom: 0,
                         right: 0,
-                        padding: '1rem',
+                        padding: '0.3rem',
                         color: axisColor,
                         backgroundColor: theme === 'dark' ? '#000' : '#fff',
                         zIndex: 5,
                         fontSize: '0.9rem',
+                        textAlign: 'right',
                     }}>
                         <p>End Time: {endTime}</p>
                     </div>
