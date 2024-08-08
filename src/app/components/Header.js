@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { AppBar, Toolbar, Typography, Container, IconButton, Tooltip, Menu, MenuItem, FormControlLabel, Switch } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import InfoIcon from '@mui/icons-material/Info';
-import Brightness7Icon from '@mui/icons-material/Brightness4';
-import Brightness4Icon from '@mui/icons-material/Brightness7';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
 import { useRouter } from 'next/router';
 
 const Header = ({ theme, toggleTheme, pageTitle, infoTooltip }) => {
@@ -35,7 +35,7 @@ const Header = ({ theme, toggleTheme, pageTitle, infoTooltip }) => {
                             {pageTitle}
                         </Typography>
                         <Tooltip title={infoTooltip} arrow>
-                            <IconButton>
+                            <IconButton sx={{ marginLeft: 2 }}>
                                 <InfoIcon />
                             </IconButton>
                         </Tooltip>
@@ -47,9 +47,9 @@ const Header = ({ theme, toggleTheme, pageTitle, infoTooltip }) => {
                                 borderRadius: 2, 
                                 padding: 1, 
                                 border: '1px solid',
-                                borderColor: theme === 'light' ? '#98FF98' : 'grey.400', // Royal Blue
+                                borderColor: theme === 'light' ? '#98FF98' : 'grey.400', // Custom colors for light/dark mode
                                 color: theme === 'light' ? '#98FF98' : 'inherit',
-                                marginRight: 2 // Adjust margin between button and theme switch
+                                marginRight: 2
                             }}
                         >
                             <Typography variant="body1">More Projects</Typography>
@@ -61,12 +61,12 @@ const Header = ({ theme, toggleTheme, pageTitle, infoTooltip }) => {
                                     onChange={toggleTheme}
                                     color="default"
                                     inputProps={{ 'aria-label': 'theme switch' }}
-                                    icon={<Brightness4Icon sx={{ marginTop: '-2px', zIndex: 2 }} />}
-                                    checkedIcon={<Brightness7Icon sx={{ marginTop: '-2px', zIndex: 2 }} />}
+                                    icon={<Brightness4Icon sx={{ marginTop: '-2px' }} />}
+                                    checkedIcon={<Brightness7Icon sx={{ marginTop: '-2px' }} />}
                                 />
                             }
                             label=""
-                            sx={{ margin: 0 }}
+                            sx={{ margin: 0, marginLeft: 1 }}
                         />
                         <Menu
                             anchorEl={anchorEl}
