@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Container, Box, TextField, IconButton, Typography, Button, useTheme, useMediaQuery, createTheme, ThemeProvider } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import Header from '../app/components/Header';
 import { utils, writeFile } from 'xlsx';
 
@@ -132,8 +131,7 @@ const StoichiometryCalculator = () => {
     const [inputs, setInputs] = useState([{ symbol: '', mass: '', ratio: '', weightPercent: '', partialMass: '' }]);
     const [totalMass, setTotalMass] = useState('');
     const [mode, setMode] = useState('light');
-    const [resultingTotalMass, setResultingTotalMass] = useState('');
-    const [selectedElementIndex, setSelectedElementIndex] = useState(null);
+    const [sheetTitle, setSheetTitle] = useState('Stoichiometry Data');
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -144,9 +142,6 @@ const StoichiometryCalculator = () => {
 
     const handleDeleteInput = (index) => {
         setInputs(inputs.filter((_, i) => i !== index));
-        if (index === selectedElementIndex) {
-            setSelectedElementIndex(null);
-        }
     };
 
     const handleSymbolChange = (index, value) => {
@@ -156,14 +151,16 @@ const StoichiometryCalculator = () => {
     };
 
     const handleRatioChange = (index, value) => {
-        const numericValue = parseFloat(value);
-        if (!isNaN(numericValue) && numericValue >= 0) {
-            setInputs(inputs.map((input, i) => (i === index ? { ...input, ratio: value } : input)));
-        }
+        const numericValue = value.replace(/[^\d.]/g, ''); // Allow only numbers and dots
+        setInputs(inputs.map((input, i) => (i === index ? { ...input, ratio: numericValue } : input)));
     };
 
     const handleTotalMassChange = (e) => {
         setTotalMass(e.target.value);
+    };
+
+    const handleSheetTitleChange = (e) => {
+        setSheetTitle(e.target.value);
     };
 
     const calculatePartialMassAndPercent = () => {
@@ -191,11 +188,13 @@ const StoichiometryCalculator = () => {
             'Weight %': input.weightPercent,
             'Partial Mass': input.partialMass,
         }));
+    
         const worksheet = utils.json_to_sheet(data);
         const workbook = utils.book_new();
-        utils.book_append_sheet(workbook, worksheet, 'Stoichiometry Data');
-        writeFile(workbook, 'Stoichiometry_Calculator_Data.xlsx');
+        utils.book_append_sheet(workbook, worksheet, sheetTitle); // Use the sheetTitle here
+        writeFile(workbook, `${sheetTitle}.xlsx`); // Include sheetTitle in file name
     };
+    
 
     const inputsWithMassAndPercent = calculatePartialMassAndPercent();
 
@@ -239,10 +238,38 @@ const StoichiometryCalculator = () => {
                     theme={mode}
                     toggleTheme={toggleTheme}
                     pageTitle="Stoichiometry Calculator"
-                    infoTooltip="Information about Stoichiometry Calculator"
+                    infoTooltip="Calculate the composition of a compound by entering element symbols, atomic ratios, and total mass. The tool provides weight percentages and partial masses, and you can export the results to Excel."
                 />
                 <Container sx={{ marginTop: 0 }}>
                     <Box sx={{ marginBottom: 4 }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                marginBottom: 2,
+                                backgroundColor: '#e0e0e0',
+                                padding: 2,
+                                borderRadius: 1,
+                                boxShadow: 1,
+                            }}
+                        >
+                            <TextField
+                                label="Excel Sheet Title"
+                                variant="outlined"
+                                fullWidth
+                                value={sheetTitle}
+                                onChange={handleSheetTitleChange}
+                                sx={{
+                                    maxWidth: 500,
+                                    '& .MuiInputBase-input': {
+                                        color: themeMode.palette.text.primary,
+                                    },
+                                    '& .MuiOutlinedInput-root': {
+                                        backgroundColor: mode === 'dark' ? '#333333' : '#ffffff',
+                                    },
+                                }}
+                            />
+                        </Box>
                         <TextField
                             label="Total Mass (g)"
                             variant="outlined"
@@ -345,40 +372,22 @@ const StoichiometryCalculator = () => {
                                         }}
                                     />
                                     <Typography variant="body2" sx={{ marginTop: 1, color: themeMode.palette.text.primary }}>
-                                        Weight %: {input.weightPercent}
+                                        Weight %: {input.weightPercent}%
                                     </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{ marginTop: 1, color: themeMode.palette.error.main }}
-                                    >
+                                    <Typography variant="body1" sx={{ marginTop: 1, color: 'secondary.main' }}>
                                         Partial Mass: {input.partialMass}
                                     </Typography>
-                                    <IconButton
-                                        onClick={handleAddInput}
-                                        sx={{
-                                            position: 'absolute',
-                                            bottom: 8,
-                                            right: 8,
-                                            backgroundColor: themeMode.palette.primary.main,
-                                            color: themeMode.palette.primary.contrastText,
-                                            '&:hover': {
-                                                backgroundColor: themeMode.palette.primary.dark,
-                                            },
-                                        }}
-                                    >
-                                        <AddIcon />
-                                    </IconButton>
                                 </Box>
                             ))}
                         </Box>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={exportToExcel}
-                            sx={{ marginTop: 2 }}
-                        >
-                            Export to Excel
-                        </Button>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+                            <Button variant="contained" color="primary" onClick={handleAddInput}>
+                                <AddIcon /> Add Element
+                            </Button>
+                            <Button variant="contained" color="success" onClick={exportToExcel}>
+                                Export to Excel
+                            </Button>
+                        </Box>
                     </Box>
                 </Container>
             </div>
