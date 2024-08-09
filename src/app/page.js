@@ -1,12 +1,8 @@
-// src/app/page.js
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, Button, Box, createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import balanceScale from '../../public/balance_scale.png';
-import invertedBalanceScale from '../../public/inverted_balance_scale.png';
 
 const HomePage = () => {
     const [theme, setTheme] = useState('light');
@@ -64,8 +60,8 @@ const HomePage = () => {
                 }}
             >
                 <Box sx={{ marginBottom: 3 }}>
-                    <Image
-                        src={theme === 'light' ? balanceScale : invertedBalanceScale}
+                    <img
+                        src={theme === 'light' ? '/balance_scale.png' : '/inverted_balance_scale.png'}
                         alt="Balance Scale Icon"
                         width={100}
                         height={100}
