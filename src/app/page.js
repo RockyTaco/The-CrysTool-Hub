@@ -4,6 +4,10 @@
 import React, { useState } from 'react';
 import { Container, Typography, Button, Box, createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image'; // Import Image component from Next.js
+
+import balanceScale from '../../public/balance_scale.png'; // Regular image
+import invertedBalanceScale from '../../public/inverted_balance_scale.png'; // Inverted image
 
 const HomePage = () => {
     const [theme, setTheme] = useState('light');
@@ -33,12 +37,14 @@ const HomePage = () => {
         },
     });
 
+    const currentTheme = theme === 'light' ? lightTheme : darkTheme;
+
     return (
-        <ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
+        <ThemeProvider theme={currentTheme}>
             <CssBaseline />
             <Container
-                maxWidth={false} // Full-width container
-                disableGutters // Remove container padding
+                maxWidth={false}
+                disableGutters
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -47,10 +53,18 @@ const HomePage = () => {
                     height: '100vh',
                     backgroundColor: 'background.default',
                     color: 'text.primary',
-                    padding: 0, // Ensure no extra padding
-                    margin: 0, // Ensure no extra margin
+                    padding: 0,
+                    margin: 0,
                 }}
             >
+                <Box sx={{ marginBottom: 3 }}>
+                    <Image
+                        src={theme === 'light' ? balanceScale : invertedBalanceScale}
+                        alt="Balance Scale Icon"
+                        width={100}
+                        height={100}
+                    />
+                </Box>
                 <Typography variant="h2" component="h1" sx={{ marginBottom: 3 }}>
                     Welcome to the CrysTool Hub
                 </Typography>
