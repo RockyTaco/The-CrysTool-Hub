@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Container, Box, TextField, IconButton, Typography, Button, useTheme, useMediaQuery, createTheme, ThemeProvider } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import Header from '../app/components/Header';
 import { utils, writeFile } from 'xlsx';
 
@@ -128,19 +129,24 @@ const ELEMENTS = [
 
 
 const StoichiometryCalculator = () => {
-    const [inputs, setInputs] = useState([{ symbol: '', mass: '', ratio: '' }]);
+    const [inputs, setInputs] = useState([{ symbol: '', mass: '', ratio: '', weightPercent: '', partialMass: '' }]);
     const [totalMass, setTotalMass] = useState('');
     const [mode, setMode] = useState('light');
+    const [resultingTotalMass, setResultingTotalMass] = useState('');
+    const [selectedElementIndex, setSelectedElementIndex] = useState(null);
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const handleAddInput = () => {
-        setInputs([...inputs, { symbol: '', mass: '', ratio: '' }]);
+        setInputs([...inputs, { symbol: '', mass: '', ratio: '', weightPercent: '', partialMass: '' }]);
     };
 
     const handleDeleteInput = (index) => {
         setInputs(inputs.filter((_, i) => i !== index));
+        if (index === selectedElementIndex) {
+            setSelectedElementIndex(null);
+        }
     };
 
     const handleSymbolChange = (index, value) => {
@@ -157,10 +163,7 @@ const StoichiometryCalculator = () => {
     };
 
     const handleTotalMassChange = (e) => {
-        const numericValue = parseFloat(e.target.value);
-        if (!isNaN(numericValue) && numericValue > 0) {
-            setTotalMass(e.target.value);
-        }
+        setTotalMass(e.target.value);
     };
 
     const calculatePartialMassAndPercent = () => {
@@ -176,7 +179,7 @@ const StoichiometryCalculator = () => {
             return {
                 ...input,
                 weightPercent: weightPercent.toFixed(2),
-                partialMass: parseFloat(partialMass.toFixed(7)).toString(),
+                partialMass: weightPercent > 0 ? parseFloat(partialMass.toFixed(7)).toString() : '',
             };
         });
     };
@@ -241,12 +244,12 @@ const StoichiometryCalculator = () => {
                 <Container sx={{ marginTop: 0 }}>
                     <Box sx={{ marginBottom: 4 }}>
                         <TextField
-                            label="Total Mass"
+                            label="Total Mass (g)"
                             variant="outlined"
                             fullWidth
                             value={totalMass}
                             onChange={handleTotalMassChange}
-                            sx={{ 
+                            sx={{
                                 maxWidth: 300,
                                 '& .MuiInputBase-input': {
                                     color: themeMode.palette.text.primary,
@@ -295,8 +298,8 @@ const StoichiometryCalculator = () => {
                                             fullWidth
                                             value={input.symbol}
                                             onChange={(e) => handleSymbolChange(index, e.target.value)}
-                                            sx={{ 
-                                                flex: 1, 
+                                            sx={{
+                                                flex: 1,
                                                 maxWidth: 200,
                                                 '& .MuiInputBase-input': {
                                                     color: themeMode.palette.text.primary,
@@ -330,8 +333,8 @@ const StoichiometryCalculator = () => {
                                         fullWidth
                                         value={input.ratio}
                                         onChange={(e) => handleRatioChange(index, e.target.value)}
-                                        sx={{ 
-                                            flex: 1, 
+                                        sx={{
+                                            flex: 1,
                                             maxWidth: 200,
                                             '& .MuiInputBase-input': {
                                                 color: themeMode.palette.text.primary,
@@ -341,40 +344,38 @@ const StoichiometryCalculator = () => {
                                             },
                                         }}
                                     />
-                                    <Typography variant="body2" sx={{ flex: 1, maxWidth: 200, backgroundColor: themeMode.palette.success.light, padding: 1, color: themeMode.palette.text.primary }}>
+                                    <Typography variant="body2" sx={{ marginTop: 1, color: themeMode.palette.text.primary }}>
                                         Weight %: {input.weightPercent}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ flex: 1, maxWidth: 200, backgroundColor: themeMode.palette.error.light, padding: 1, color: themeMode.palette.text.primary }}>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{ marginTop: 1, color: themeMode.palette.error.main }}
+                                    >
                                         Partial Mass: {input.partialMass}
                                     </Typography>
+                                    <IconButton
+                                        onClick={handleAddInput}
+                                        sx={{
+                                            position: 'absolute',
+                                            bottom: 8,
+                                            right: 8,
+                                            backgroundColor: themeMode.palette.primary.main,
+                                            color: themeMode.palette.primary.contrastText,
+                                            '&:hover': {
+                                                backgroundColor: themeMode.palette.primary.dark,
+                                            },
+                                        }}
+                                    >
+                                        <AddIcon />
+                                    </IconButton>
                                 </Box>
                             ))}
-                            <IconButton
-                                onClick={handleAddInput}
-                                sx={{
-                                    alignSelf: 'flex-start',
-                                    backgroundColor: themeMode.palette.success.main,
-                                    color: themeMode.palette.success.contrastText,
-                                    '&:hover': {
-                                        backgroundColor: themeMode.palette.success.dark,
-                                    },
-                                }}
-                            >
-                                <AddIcon />
-                            </IconButton>
                         </Box>
                         <Button
                             variant="contained"
                             color="primary"
                             onClick={exportToExcel}
-                            sx={{
-                                alignSelf: 'flex-start',
-                                backgroundColor: themeMode.palette.primary.main,
-                                color: themeMode.palette.primary.contrastText,
-                                '&:hover': {
-                                    backgroundColor: themeMode.palette.primary.dark,
-                                },
-                            }}
+                            sx={{ marginTop: 2 }}
                         >
                             Export to Excel
                         </Button>

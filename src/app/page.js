@@ -37,15 +37,18 @@ const HomePage = () => {
         <ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
             <CssBaseline />
             <Container
+                maxWidth={false} // Full-width container
+                disableGutters // Remove container padding
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     height: '100vh',
-                    padding: 2,
                     backgroundColor: 'background.default',
                     color: 'text.primary',
+                    padding: 0, // Ensure no extra padding
+                    margin: 0, // Ensure no extra margin
                 }}
             >
                 <Typography variant="h2" component="h1" sx={{ marginBottom: 3 }}>
