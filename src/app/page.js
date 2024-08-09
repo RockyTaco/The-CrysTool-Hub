@@ -1,12 +1,13 @@
 'use client'; // Mark this file as a client component
 
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Button, Box, createTheme, ThemeProvider, CssBaseline } from '@mui/material';
+import { Container, Typography, Button, Box, createTheme, ThemeProvider, CssBaseline, IconButton } from '@mui/material';
 import Image from 'next/image';
 import balanceScale from '../../public/balance_scale.png';
 import invertedBalanceScale from '../../public/inverted_balance_scale.png';
 import LoadingPage from './components/LoadingPage';
 import { useRouter } from 'next/navigation';
+import GitHubIcon from '@mui/icons-material/GitHub'; // Import GitHub icon
 
 const HomePage = () => {
     const [theme, setTheme] = useState('light');
@@ -16,26 +17,24 @@ const HomePage = () => {
     useEffect(() => {
         const savedTheme = localStorage.getItem('theme') || 'light';
         setTheme(savedTheme);
-        
-        // Set a timeout to hide the loading page after a delay
+
         const loadingTimeout = setTimeout(() => {
-            setLoading(false); // Hide the loading page after delay
-        }, 100); // Adjust the delay as needed (1000ms = 1 second)
+            setLoading(false);
+        }, 100);
 
         return () => {
-            clearTimeout(loadingTimeout); // Clear the timeout if the component unmounts
+            clearTimeout(loadingTimeout);
         };
     }, []);
 
     useEffect(() => {
-        // Check if router is defined
         if (router.isReady) {
             const loadingTimeout = setTimeout(() => {
-                setLoading(false); // Hide loading page after delay
-            }, 1000); // Adjust the delay as needed (1000ms = 1 second)
+                setLoading(false);
+            }, 1000);
 
             return () => {
-                clearTimeout(loadingTimeout); // Clear the timeout if the component unmounts
+                clearTimeout(loadingTimeout);
             };
         }
 
@@ -55,7 +54,7 @@ const HomePage = () => {
     const handleThemeChange = () => {
         const newTheme = theme === 'light' ? 'dark' : 'light';
         setTheme(newTheme);
-        localStorage.setItem('theme', newTheme); // Save the theme preference
+        localStorage.setItem('theme', newTheme);
     };
 
     const darkTheme = createTheme({
@@ -130,13 +129,39 @@ const HomePage = () => {
                         manley15@purdue.edu
                     </Typography>
                 </Box>
+                <Box sx={{ marginTop: 4 }}>
+                    <IconButton
+                        component="a"
+                        href="https://github.com/RockyTaco/The-CrysTool-Hub"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                            color: currentTheme.palette.text.primary,
+                            '&:hover': {
+                                color: currentTheme.palette.primary.main,
+                            },
+                        }}
+                    >
+                        <GitHubIcon fontSize="large" />
+                    </IconButton>
+                </Box>
                 <Button
                     variant="contained"
-                    sx={{ marginTop: 2 }}
+                    sx={{
+                        marginTop: 2,
+                        backgroundColor: theme === 'light' ? 'secondary.main' : 'secondary.main', // Change button color based on the theme
+                        color: 'common.white', // Button text color
+                        '&:hover': {
+                            backgroundColor: theme === 'light' ? 'secondary.dark' : 'secondary.dark', // Darker color on hover
+                        },
+                        padding: '10px 20px', // Adjust padding as needed
+                        borderRadius: '8px', // Optional: Adjust border radius
+                    }}
                     onClick={handleThemeChange}
                 >
                     Toggle {theme === 'light' ? 'Dark' : 'Light'} Mode
                 </Button>
+
             </Container>
         </ThemeProvider>
     );
