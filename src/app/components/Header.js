@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { AppBar, Toolbar, Typography, Container, IconButton, Tooltip, Menu, MenuItem, FormControlLabel, Switch } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import InfoIcon from '@mui/icons-material/Info';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness4Icon from '@mui/icons-material/Brightness7';
+import Brightness7Icon from '@mui/icons-material/Brightness4';
 import { useRouter } from 'next/router';
 
 const Header = ({ theme, toggleTheme, pageTitle, infoTooltip }) => {

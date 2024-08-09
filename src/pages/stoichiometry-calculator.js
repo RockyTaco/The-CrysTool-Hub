@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Box, TextField, IconButton, Typography, Button, useTheme, useMediaQuery, createTheme, ThemeProvider } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -133,6 +133,14 @@ const StoichiometryCalculator = () => {
     const [mode, setMode] = useState('light');
     const [sheetTitle, setSheetTitle] = useState('Stoichiometry Data');
 
+    // Load saved theme mode from local storage
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            setMode(savedTheme);
+        }
+    }, []);
+
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -186,7 +194,7 @@ const StoichiometryCalculator = () => {
             Element: input.symbol,
             'Atomic Ratio': input.ratio,
             'Weight %': input.weightPercent,
-            'Partial Mass': input.partialMass,
+            'Partial Mass (g)': input.partialMass,
         }));
 
         const worksheet = utils.json_to_sheet(data);
@@ -194,7 +202,6 @@ const StoichiometryCalculator = () => {
         utils.book_append_sheet(workbook, worksheet, sheetTitle); // Use the sheetTitle here
         writeFile(workbook, `${sheetTitle}.xlsx`); // Include sheetTitle in file name
     };
-
 
     const inputsWithMassAndPercent = calculatePartialMassAndPercent();
 
@@ -227,8 +234,11 @@ const StoichiometryCalculator = () => {
         },
     });
 
+    // Save theme mode to local storage
     const toggleTheme = () => {
-        setMode(prevMode => (prevMode === 'light' ? 'dark' : 'light'));
+        const newMode = mode === 'light' ? 'dark' : 'light';
+        setMode(newMode);
+        localStorage.setItem('theme', newMode);
     };
 
     return (
@@ -252,7 +262,6 @@ const StoichiometryCalculator = () => {
                                 borderRadius: 1,
                                 boxShadow: 1,
                             }}
-
                         >
                             <TextField
                                 label="Excel Sheet Title"
@@ -372,23 +381,30 @@ const StoichiometryCalculator = () => {
                                             },
                                         }}
                                     />
-                                    <Typography variant="body2" sx={{ marginTop: 1, color: themeMode.palette.text.primary }}>
-                                        Weight %: {input.weightPercent}%
+                                    <Typography variant="body2" sx={{ color: 'orange' }}>
+                                        Weight %: {input.weightPercent}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ marginTop: 1, color: 'secondary.main' }}>
-                                        Partial Mass: {input.partialMass}
+                                    <Typography variant="body1" sx={{ color: themeMode.palette.secondary.main }}>
+                                        Partial Mass (g): {input.partialMass}
                                     </Typography>
                                 </Box>
                             ))}
                         </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
-                            <Button variant="contained" color="primary" onClick={handleAddInput}>
-                                <AddIcon /> Add Element
-                            </Button>
-                            <Button variant="contained" color="success" onClick={exportToExcel}>
-                                Export to Excel
-                            </Button>
-                        </Box>
+                    </Box>
+                    <Box
+                        sx={{
+                            marginTop: 4,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Button variant="contained" color="primary" onClick={handleAddInput} sx={{ marginRight: 2 }}>
+                            <AddIcon />
+                            Add Element
+                        </Button>
+                        <Button variant="contained" color="success" onClick={exportToExcel}>
+                            Export to Excel
+                        </Button>
                     </Box>
                 </Container>
             </div>

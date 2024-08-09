@@ -1,17 +1,21 @@
 // src/app/page.js
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Typography, Button, Box, createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image'; // Import Image component from Next.js
-
-import balanceScale from '../../public/balance_scale.png'; // Regular image
-import invertedBalanceScale from '../../public/inverted_balance_scale.png'; // Inverted image
+import Image from 'next/image';
+import balanceScale from '../../public/balance_scale.png';
+import invertedBalanceScale from '../../public/inverted_balance_scale.png';
 
 const HomePage = () => {
     const [theme, setTheme] = useState('light');
     const router = useRouter();
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+    }, []);
 
     const navigateToFurnaceGraph = () => {
         router.push('/furnace-graph');
@@ -22,7 +26,9 @@ const HomePage = () => {
     };
 
     const handleThemeChange = () => {
-        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme); // Save the theme preference
     };
 
     const darkTheme = createTheme({

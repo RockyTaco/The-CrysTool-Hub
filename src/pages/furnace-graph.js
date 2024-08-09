@@ -12,6 +12,7 @@ const FurnaceGraphPage = () => {
     const [theme, setTheme] = useState('light');
     const timeInputRef = useRef(null);
 
+    // Define the dark and light themes
     const darkTheme = createTheme({
         palette: {
             mode: 'dark',
@@ -24,8 +25,17 @@ const FurnaceGraphPage = () => {
         },
     });
 
+    // Load the theme from local storage on component mount
+    useEffect(() => {
+        const storedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(storedTheme);
+    }, []);
+
+    // Save the theme to local storage when it changes
     const handleThemeChange = () => {
-        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
     };
 
     useEffect(() => {
