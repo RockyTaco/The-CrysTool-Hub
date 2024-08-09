@@ -1,17 +1,48 @@
-'use client';
+'use client'; // Mark this file as a client component
 
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, Button, Box, createTheme, ThemeProvider, CssBaseline } from '@mui/material';
+import Image from 'next/image';
+import balanceScale from '../../public/balance_scale.png';
+import invertedBalanceScale from '../../public/inverted_balance_scale.png';
+import LoadingPage from './components/LoadingPage';
 import { useRouter } from 'next/navigation';
 
 const HomePage = () => {
     const [theme, setTheme] = useState('light');
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
         const savedTheme = localStorage.getItem('theme') || 'light';
         setTheme(savedTheme);
+        
+        // Set a timeout to hide the loading page after a delay
+        const loadingTimeout = setTimeout(() => {
+            setLoading(false); // Hide the loading page after delay
+        }, 100); // Adjust the delay as needed (1000ms = 1 second)
+
+        return () => {
+            clearTimeout(loadingTimeout); // Clear the timeout if the component unmounts
+        };
     }, []);
+
+    useEffect(() => {
+        // Check if router is defined
+        if (router.isReady) {
+            const loadingTimeout = setTimeout(() => {
+                setLoading(false); // Hide loading page after delay
+            }, 1000); // Adjust the delay as needed (1000ms = 1 second)
+
+            return () => {
+                clearTimeout(loadingTimeout); // Clear the timeout if the component unmounts
+            };
+        }
+
+        return () => {
+            // Cleanup if necessary
+        };
+    }, [router.isReady]);
 
     const navigateToFurnaceGraph = () => {
         router.push('/furnace-graph');
@@ -44,6 +75,7 @@ const HomePage = () => {
     return (
         <ThemeProvider theme={currentTheme}>
             <CssBaseline />
+            {loading && <LoadingPage />}
             <Container
                 maxWidth={false}
                 disableGutters
@@ -60,8 +92,8 @@ const HomePage = () => {
                 }}
             >
                 <Box sx={{ marginBottom: 3 }}>
-                    <img
-                        src={theme === 'light' ? '/balance_scale.png' : '/inverted_balance_scale.png'}
+                    <Image
+                        src={theme === 'light' ? balanceScale : invertedBalanceScale}
                         alt="Balance Scale Icon"
                         width={100}
                         height={100}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Box, TextField, IconButton, Typography, Button, useTheme, useMediaQuery, createTheme, ThemeProvider } from '@mui/material';
+import { Container, Box, TextField, IconButton, Typography, Button, useTheme, useMediaQuery, createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Header from '../app/components/Header';
 import { utils, writeFile } from 'xlsx';
+import LoadingScreen from '../app/components/LoadingPage'; // Import LoadingScreen component
 
 const ELEMENTS = [
     { symbol: 'H', mass: 1.008 },
@@ -132,6 +133,7 @@ const StoichiometryCalculator = () => {
     const [totalMass, setTotalMass] = useState('');
     const [mode, setMode] = useState('light');
     const [sheetTitle, setSheetTitle] = useState('Stoichiometry Data');
+    const [loading, setLoading] = useState(false); // State to control loading screen visibility
 
     // Load saved theme mode from local storage
     useEffect(() => {
@@ -139,10 +141,17 @@ const StoichiometryCalculator = () => {
         if (savedTheme) {
             setMode(savedTheme);
         }
+        setLoading(true);
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 150); // Simulate loading for 1 second
+
+        return () => clearTimeout(timer);
     }, []);
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
 
     const handleAddInput = () => {
         setInputs([...inputs, { symbol: '', mass: '', ratio: '', weightPercent: '', partialMass: '' }]);
@@ -243,6 +252,8 @@ const StoichiometryCalculator = () => {
 
     return (
         <ThemeProvider theme={themeMode}>
+            <CssBaseline />
+            {loading && <LoadingScreen />}
             <div style={{ backgroundColor: themeMode.palette.background.default, minHeight: '100vh' }}>
                 <Header
                     theme={mode}
