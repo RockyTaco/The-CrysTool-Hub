@@ -52,7 +52,7 @@ const HomePage = () => {
                 }}
             >
                 <Typography variant="h2" component="h1" sx={{ marginBottom: 3 }}>
-                    Welcome to the Calculator Hub
+                    Welcome to the CrysTool Hub
                 </Typography>
                 <Typography variant="h5" sx={{ marginBottom: 3 }}>
                     Choose a tool to get started:
