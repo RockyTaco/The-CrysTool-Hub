@@ -188,13 +188,13 @@ const StoichiometryCalculator = () => {
             'Weight %': input.weightPercent,
             'Partial Mass': input.partialMass,
         }));
-    
+
         const worksheet = utils.json_to_sheet(data);
         const workbook = utils.book_new();
         utils.book_append_sheet(workbook, worksheet, sheetTitle); // Use the sheetTitle here
         writeFile(workbook, `${sheetTitle}.xlsx`); // Include sheetTitle in file name
     };
-    
+
 
     const inputsWithMassAndPercent = calculatePartialMassAndPercent();
 
@@ -247,11 +247,12 @@ const StoichiometryCalculator = () => {
                                 display: 'flex',
                                 justifyContent: 'center',
                                 marginBottom: 2,
-                                backgroundColor: '#e0e0e0',
+                                backgroundColor: themeMode.palette.mode === 'light' ? '#f5f5f5' : '#424242',
                                 padding: 2,
                                 borderRadius: 1,
                                 boxShadow: 1,
                             }}
+
                         >
                             <TextField
                                 label="Excel Sheet Title"
@@ -260,7 +261,7 @@ const StoichiometryCalculator = () => {
                                 value={sheetTitle}
                                 onChange={handleSheetTitleChange}
                                 sx={{
-                                    maxWidth: 500,
+                                    maxWidth: 1000,
                                     '& .MuiInputBase-input': {
                                         color: themeMode.palette.text.primary,
                                     },
