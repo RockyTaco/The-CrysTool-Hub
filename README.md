@@ -1,3 +1,14 @@
+## Welcome to The CrysTool Hub
+
+This project was developed with experience from and for University of Tennesee's Professor David Mandrus's Emergent Crystalline Matter Research Group.
+
+It currently has two tools:
+- Furnace Graph Generator: This tool helps you design furnace plans by plotting temperature versus time, which can be exported as PDFs. Input temperatures and durations to create points on the graph. Click on a point to remove it.
+- Calculate the composition of a compound by entering element symbols, atomic ratios, and total mass. The tool provides weight percentages and partial masses, and you can export the results to Excel.
+
+The website is deployed through vercel, accessible with this link: https://the-crys-tool-hub.vercel.app
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
