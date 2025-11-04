@@ -127,9 +127,92 @@ const ELEMENTS = [
     { symbol: 'Og', mass: 294 },
 ];
 
+// Create a Map for efficient element mass lookup
+const ELEMENT_MASSES = new Map(ELEMENTS.map(el => [el.symbol, el.mass]));
+
+/**
+ * Calculates the molecular mass of a chemical formula.
+ * Supports coefficients, parentheses, and subscripts.
+ * @param {string} formulaStr - The chemical formula string (e.g., "2H2O", "Al2(SO4)3").
+ * @returns {number} The calculated molecular mass, or 0 if the formula is invalid.
+ */
+const getMolecularMass = (formulaStr) => {
+    if (!formulaStr || !formulaStr.trim()) {
+        return 0;
+    }
+
+    // --- Step 1: Handle overall coefficient ---
+    // Match a leading number (coefficient)
+    const coeffMatch = formulaStr.match(/^(\d+)/);
+    let coefficient = 1;
+    let formula = formulaStr;
+
+    if (coeffMatch) {
+        coefficient = parseInt(coeffMatch[1], 10);
+        // Get the rest of the string after the coefficient
+        formula = formulaStr.substring(coeffMatch[1].length);
+    }
+
+    // --- Step 2: Parse the formula ---
+    // Regex to find:
+    // 1. Element (e.g., "Na", "H")
+    // 2. Element subscript (e.g., "2")
+    // 3. Opening parenthesis
+    // 4. Closing parenthesis
+    // 5. Group subscript (e.g., "3" in "(SO4)3")
+    const formulaRegex = /([A-Z][a-z]*)(\d*)|(\()|(\))(\d*)/g;
+    let match;
+    const stack = [0]; // Use a stack to handle nested parentheses
+    let validFormula = false; // Flag to check if we parsed at least one valid part
+
+    while ((match = formulaRegex.exec(formula)) !== null) {
+        const [fullMatch, element, elemSub, openParen, closeParen, closeSub] = match;
+
+        if (element) {
+            // --- Found an element ---
+            const mass = ELEMENT_MASSES.get(element);
+            if (!mass) {
+                console.warn(`Invalid element: ${element}`);
+                return 0; // Invalid element symbol
+            }
+            const count = elemSub ? parseInt(elemSub, 10) : 1;
+            stack[stack.length - 1] += mass * count;
+            validFormula = true;
+        } else if (openParen) {
+            // --- Found an opening parenthesis ---
+            // Push a new 0 onto the stack to start a new group sum
+            stack.push(0);
+        } else if (closeParen) {
+            // --- Found a closing parenthesis ---
+            if (stack.length < 2) {
+                return 0; // Unbalanced parentheses (e.g., "H2)O")
+            }
+            const groupMass = stack.pop(); // Get the mass of the completed group
+            const count = closeSub ? parseInt(closeSub, 10) : 1;
+            // Add the group's total mass (multiplied by its subscript) to the previous item on the stack
+            stack[stack.length - 1] += groupMass * count;
+            validFormula = true;
+        }
+    }
+
+    // --- Step 3: Final validation and calculation ---
+    if (stack.length !== 1) {
+        return 0; // Unbalanced parentheses (e.g., "Al(SO4")
+    }
+    
+    if (!validFormula && formula.trim()) {
+        // Handle cases where regex had no matches but string wasn't empty (e.g., "abc")
+        return 0;
+    }
+
+    // The final mass is the last item on the stack, multiplied by the overall coefficient
+    return stack[0] * coefficient;
+};
+
 
 const StoichiometryCalculator = () => {
-    const [inputs, setInputs] = useState([{ symbol: '', mass: '', ratio: '', weightPercent: '', partialMass: '' }]);
+    // State now uses 'formula' instead of 'symbol'
+    const [inputs, setInputs] = useState([{ formula: '', mass: '', ratio: '', weightPercent: '', partialMass: '' }]);
     const [totalMass, setTotalMass] = useState('');
     const [mode, setMode] = useState('light');
     const [sheetTitle, setSheetTitle] = useState('Stoichiometry Data');
@@ -144,7 +227,7 @@ const StoichiometryCalculator = () => {
         setLoading(true);
         const timer = setTimeout(() => {
             setLoading(false);
-        }, 150); // Simulate loading for 1 second
+        }, 150); // Simulate loading
 
         return () => clearTimeout(timer);
     }, []);
@@ -154,17 +237,24 @@ const StoichiometryCalculator = () => {
 
 
     const handleAddInput = () => {
-        setInputs([...inputs, { symbol: '', mass: '', ratio: '', weightPercent: '', partialMass: '' }]);
+        // Add new input with 'formula'
+        setInputs([...inputs, { formula: '', mass: '', ratio: '', weightPercent: '', partialMass: '' }]);
     };
 
     const handleDeleteInput = (index) => {
         setInputs(inputs.filter((_, i) => i !== index));
     };
 
-    const handleSymbolChange = (index, value) => {
-        const element = ELEMENTS.find(el => el.symbol.toUpperCase() === value.toUpperCase());
-        const mass = element ? element.mass : '';
-        setInputs(inputs.map((input, i) => (i === index ? { ...input, symbol: value, mass } : input)));
+    // Renamed from handleSymbolChange
+    const handleFormulaChange = (index, value) => {
+        // Calculate molecular mass using the new parser
+        const mass = getMolecularMass(value);
+        setInputs(inputs.map((input, i) => (
+            i === index 
+            // Store the formula, and the mass (if valid, otherwise empty string)
+            ? { ...input, formula: value, mass: mass > 0 ? mass.toFixed(5) : '' } 
+            : input
+        )));
     };
 
     const handleRatioChange = (index, value) => {
@@ -180,6 +270,7 @@ const StoichiometryCalculator = () => {
         setSheetTitle(e.target.value);
     };
 
+    // This function works as-is, since it just needs 'input.mass' which is now the molecular mass
     const calculatePartialMassAndPercent = () => {
         const weights = inputs.map(input => {
             const ratio = parseFloat(input.ratio) || 0;
@@ -199,9 +290,10 @@ const StoichiometryCalculator = () => {
     };
 
     const exportToExcel = () => {
+        // Update column headers to be more accurate
         const data = calculatePartialMassAndPercent().map((input, index) => ({
-            Element: input.symbol,
-            'Atomic Ratio': input.ratio,
+            'Compound': input.formula, // Changed from 'Element'
+            'Molar Ratio': input.ratio, // Changed from 'Atomic Ratio'
             'Weight %': input.weightPercent,
             'Partial Mass (g)': input.partialMass,
         }));
@@ -259,7 +351,8 @@ const StoichiometryCalculator = () => {
                     theme={mode}
                     toggleTheme={toggleTheme}
                     pageTitle="Stoichiometry Calculator"
-                    infoTooltip="Calculate the composition of a compound by entering element symbols, atomic ratios, and total mass. The tool provides weight percentages and partial masses, and you can export the results to Excel."
+                    // Updated tooltip information
+                    infoTooltip="Calculate the composition of a mixture by entering compound formulas (e.g., H2O, 2NaCl, Al2(SO4)3), their molar ratios, and total mass. The tool provides weight percentages and partial masses, and you can export the results to Excel."
                 />
                 <Container sx={{ marginTop: 0 }}>
                     <Box sx={{ marginBottom: 4 }}>
@@ -341,11 +434,13 @@ const StoichiometryCalculator = () => {
                                 >
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                         <TextField
-                                            label={`Element ${index + 1}`}
+                                            // Updated label
+                                            label={`Compound ${index + 1}`}
                                             variant="outlined"
                                             fullWidth
-                                            value={input.symbol}
-                                            onChange={(e) => handleSymbolChange(index, e.target.value)}
+                                            // Updated value and onChange
+                                            value={input.formula}
+                                            onChange={(e) => handleFormulaChange(index, e.target.value)}
                                             sx={{
                                                 flex: 1,
                                                 maxWidth: 200,
@@ -372,11 +467,13 @@ const StoichiometryCalculator = () => {
                                     </Box>
                                     {input.mass && (
                                         <Typography variant="body2" sx={{ marginTop: 1, color: themeMode.palette.text.primary }}>
-                                            Atomic Mass: {input.mass}
+                                            {/* Updated label */}
+                                            Molecular Mass: {input.mass}
                                         </Typography>
                                     )}
                                     <TextField
-                                        label="Atomic Ratio"
+                                        // Updated label
+                                        label="Molar Ratio"
                                         variant="outlined"
                                         fullWidth
                                         value={input.ratio}
@@ -411,7 +508,8 @@ const StoichiometryCalculator = () => {
                     >
                         <Button variant="contained" color="primary" onClick={handleAddInput} sx={{ marginRight: 2 }}>
                             <AddIcon />
-                            Add Element
+                            {/* Updated button text */}
+                            Add Compound
                         </Button>
                         <Button variant="contained" color="success" onClick={exportToExcel}>
                             Export to Excel
@@ -424,3 +522,4 @@ const StoichiometryCalculator = () => {
 };
 
 export default StoichiometryCalculator;
+
