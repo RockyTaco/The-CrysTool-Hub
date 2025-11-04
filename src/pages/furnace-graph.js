@@ -6,7 +6,7 @@ import Graph from '../app/components/Graph'; // Update the path
 import LoadingPage from '../app/components/LoadingPage'; // Update the path
 
 const FurnaceGraphPage = () => {
-    const [data, setData] = useState([{ time: 0, temperature: 0 }]);
+    const [data, setData] = useState([{ time: 0, temperature: 20 }]);
     const [cumulativeTime, setCumulativeTime] = useState(0);
     const [prevTemperature, setPrevTemperature] = useState(0);
     const [graphTitle, setGraphTitle] = useState('Graph Title');
